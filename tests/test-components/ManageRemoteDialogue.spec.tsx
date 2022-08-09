@@ -61,6 +61,11 @@ describe('ManageRemoteDialogue', () => {
             body: () => {
               return { code: 0, remotes: REMOTES };
             }
+          },
+          'remote/testDELETE': {
+            body: () => {
+              return { code: 0 };
+            }
           }
         }
       })
@@ -165,7 +170,7 @@ describe('ManageRemoteDialogue', () => {
   });
 
   describe('functionality', () => {
-    it('should add a new remote', async () => {
+    it('should call addRemote upon clicking the add button', async () => {
       const remoteDialogue = shallow(
         <ManageRemoteDialogue {...createProps()} />
       );
@@ -188,6 +193,23 @@ describe('ManageRemoteDialogue', () => {
         newRemote.url,
         newRemote.name
       );
+    });
+
+    it('should call removeRemote upon clicking the delete button of an existing remote', async () => {
+      const remoteDialogue = shallow(
+        <ManageRemoteDialogue {...createProps()} />
+      );
+      await remoteDialogue.instance().componentDidMount();
+
+      const spyGitRemoveRemote = jest.spyOn(
+        GitExtension.prototype,
+        'removeRemote'
+      );
+      const deleteButton = remoteDialogue.find(ActionButton).first();
+      deleteButton.simulate('click');
+      const remoteToDelete = REMOTES[0];
+      expect(spyGitRemoveRemote).toHaveBeenCalledTimes(1);
+      expect(spyGitRemoveRemote).toHaveBeenCalledWith(remoteToDelete.name);
     });
   });
 });
